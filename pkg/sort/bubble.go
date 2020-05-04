@@ -53,18 +53,3 @@ func (bs *BubbleSorter) Shuffle() {
 	bs.i = 0
 	bs.j = len(bs.arr) - 1
 }
-
-//func bubbleSort(tosort []int) {
-//	size := len(tosort)
-//	if size < 2 {
-//		return
-//	}
-//
-//	for i := 0; i < size; i++ {
-//		for j := size - 1; j >= i+1; j-- {
-//			if tosort[j] < tosort[j-1] {
-//				tosort[j], tosort[j-1] = tosort[j-1], tosort[j]
-//			}
-//		}
-//	}
-//}

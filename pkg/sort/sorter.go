@@ -2,8 +2,6 @@ package sort
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 
 	"github.com/shkov/sort-visualization/pkg/iteration"
 )
@@ -17,10 +15,6 @@ type Algorithm string
 const (
 	AlgorithmBubble Algorithm = "bubble"
 )
-
-func (a *Algorithm) Usage() string {
-	return fmt.Sprintf("possible values: %s", strings.Join([]string{string(AlgorithmBubble)}, ","))
-}
 
 func ParseAlgorithm(val string) (Algorithm, error) {
 	switch Algorithm(val) {
