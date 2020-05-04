@@ -1,6 +1,7 @@
 package terminal
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -18,6 +19,13 @@ type Config struct {
 }
 
 func (cfg Config) Validate() error {
+	if cfg.Sorter == nil {
+		return errors.New("must provide Sorter")
+	}
+	if cfg.RefreshTimeout <= 0 {
+		return errors.New("must provide RefreshTimeout")
+	}
+
 	return nil
 }
 
@@ -28,7 +36,16 @@ type Sorter interface {
 	String() string
 }
 
+type state int
+
+const (
+	stateWaiting state = iota
+	stateRunning
+	stateClosed
+)
+
 type Terminal struct {
+	state          state
 	barChart       *widgets.BarChart
 	sorter         Sorter
 	refreshTimeout time.Duration
@@ -51,6 +68,7 @@ func New(cfg Config) (*Terminal, error) {
 	bc.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
 
 	t := &Terminal{
+		state:          stateWaiting,
 		barChart:       bc,
 		sorter:         cfg.Sorter,
 		refreshTimeout: cfg.RefreshTimeout,
@@ -62,17 +80,22 @@ func New(cfg Config) (*Terminal, error) {
 }
 
 func (t *Terminal) RunWidget() error {
-	err := ui.Init()
-	if err != nil {
-		return fmt.Errorf("failed to initialize termui: %w", err)
+	if t.state != stateWaiting {
+		return errors.New("invalid terminal state")
 	}
 
-	t.drawBarChart()
+	err := ui.Init()
+	if err != nil {
+		return fmt.Errorf("failed to initialize term ui: %w", err)
+	}
 
-	return nil
-}
+	dataset := t.getDataset(t.sorter.Dump())
+	colors := t.getColors(dataset, []int{})
+	t.barChart.Data = dataset
+	t.barChart.BarColors = colors
+	ui.Render(t.barChart)
 
-func (t *Terminal) drawBarChart() {
+	// Start bar chard background updating.
 	t.wg.Add(1)
 	go func() {
 		defer t.wg.Done()
@@ -83,30 +106,75 @@ func (t *Terminal) drawBarChart() {
 		for {
 			select {
 			case <-ticker.C:
-				ok := t.sorter.Step()
-				if !ok {
-					t.sorter.Shuffle()
-					break
-				}
-
-				iter := t.sorter.Dump()
-				dataset, colors, ok := t.getDataset(iter)
-				if !ok {
-					break
-				}
-
-				t.barChart.Data = dataset
-				t.barChart.BarColors = colors
-				ui.Render(t.barChart)
+				t.renderBadChart()
 
 			case <-t.closeCh:
 				return
 			}
 		}
 	}()
+
+	t.state = stateRunning
+
+	return nil
 }
 
-func (t *Terminal) getDataset(iter *iteration.ArrayIterator) ([]float64, []ui.Color, bool) {
+func (t *Terminal) renderBadChart() {
+	ok := t.sorter.Step()
+	if !ok {
+		t.sorter.Shuffle()
+		return
+	}
+
+	iter := t.sorter.Dump()
+	dataset := t.getDataset(iter)
+
+	// Find updated values.
+	updatedIdxs := make([]int, 0)
+	for i := range dataset {
+		if dataset[i] != t.barChart.Data[i] {
+			updatedIdxs = append(updatedIdxs, i)
+		}
+	}
+
+	if len(updatedIdxs) == 0 {
+		return
+	}
+
+	colors := t.getColors(dataset, updatedIdxs)
+
+	t.barChart.Data = dataset
+	t.barChart.BarColors = colors
+	ui.Render(t.barChart)
+}
+
+func (t *Terminal) getColors(dataset []float64, updatedIdxs []int) []ui.Color {
+	// isUpdated checks if index is in the updated index list.
+	isUpdated := func(i int) bool {
+		for _, updatedIdx := range updatedIdxs {
+			if i == updatedIdx {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	// If value was updated it will have another color.
+	colors := make([]ui.Color, 0, len(dataset))
+	for i := range dataset {
+		if isUpdated(i) {
+			colors = append(colors, ui.ColorRed)
+			continue
+		}
+
+		colors = append(colors, ui.ColorWhite)
+	}
+
+	return colors
+}
+
+func (t *Terminal) getDataset(iter *iteration.ArrayIterator) []float64 {
 	dataset := make([]float64, 0)
 	for {
 		item, ok := iter.Next()
@@ -116,32 +184,7 @@ func (t *Terminal) getDataset(iter *iteration.ArrayIterator) ([]float64, []ui.Co
 		dataset = append(dataset, float64(item))
 	}
 
-	if len(t.barChart.Data) == 0 {
-		return dataset, []ui.Color{ui.ColorWhite}, true
-	}
-
-	updatedIdxs := make([]int, 0)
-	for i := range dataset {
-		if dataset[i] != t.barChart.Data[i] {
-			updatedIdxs = append(updatedIdxs, i)
-		}
-	}
-	if len(updatedIdxs) == 0 {
-		return nil, nil, false
-	}
-
-	colors := make([]ui.Color, 0, len(dataset))
-	for i := range dataset {
-		for _, updatedIdx := range updatedIdxs {
-			if i == updatedIdx {
-				colors = append(colors, ui.ColorRed)
-				break
-			}
-		}
-		colors = append(colors, ui.ColorWhite)
-	}
-
-	return dataset, colors, true
+	return dataset
 }
 
 func (t *Terminal) WaitExitSignal() {
@@ -155,8 +198,14 @@ func (t *Terminal) WaitExitSignal() {
 	}
 }
 
-func (t *Terminal) Cancel() {
+func (t *Terminal) Close() {
+	if t.state != stateRunning {
+		return
+	}
+
 	close(t.closeCh)
 	t.wg.Wait()
 	ui.Close()
+
+	t.state = stateClosed
 }

@@ -63,5 +63,5 @@ func main() {
 
 	t.WaitExitSignal()
 
-	t.Cancel()
+	t.Close()
 }
