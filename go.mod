@@ -4,5 +4,6 @@ go 1.14
 
 require (
 	github.com/gizak/termui/v3 v3.1.0
-	github.com/go-kit/kit v0.10.0
+	github.com/go-kit/kit v0.10.0 // indirect
+	github.com/stretchr/testify v1.4.0
 )
