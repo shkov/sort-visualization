@@ -5,14 +5,14 @@
 Visualization of Sorting Algorithms in Golang.
 Sorts random shuffles of integers, with both speed and the number of items adapted to each algorithm's complexity.
 
-![](demo/example.gif)
+![](demo/bubble.gif)
 
 ## Getting started
 
 #### 1. Installation
 
 ```shell script
-$ go install github.com/shkov/sort-visualization
+$ go install github.com/shkov/sort-visualization/cmd/sort-visualization
 ```
 
 #### 2. Usage
