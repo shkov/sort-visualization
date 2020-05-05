@@ -3,15 +3,10 @@ package main
 import (
 	"flag"
 	"log"
-	"math/rand"
 	"time"
 
 	"github.com/shkov/sort-visualization/pkg/sort"
 	"github.com/shkov/sort-visualization/pkg/terminal"
-)
-
-const (
-	maxSortItem = 45
 )
 
 type configuration struct {
@@ -36,17 +31,17 @@ func main() {
 		log.Fatalf("failed to parse configuration: %v", err)
 	}
 
-	dataset := make([]int, 0, 30)
-	for i := 1; i <= maxSortItem; i++ {
+	dataset := make([]int, 0, terminal.MaxBarChartItems)
+	for i := 1; i <= terminal.MaxBarChartItems; i++ {
 		dataset = append(dataset, i)
 	}
-
-	rand.Shuffle(len(dataset), func(i, j int) { dataset[i], dataset[j] = dataset[j], dataset[i] })
 
 	sorter, err := sort.NewSorter(dataset, cfg.SortingAlgorithm)
 	if err != nil {
 		log.Fatalf("failed to initialize sorter: %v", err)
 	}
+
+	sorter.Shuffle()
 
 	t, err := terminal.New(terminal.Config{
 		Sorter:         sorter,

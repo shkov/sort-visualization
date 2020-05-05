@@ -26,7 +26,7 @@ func ParseAlgorithm(val string) (Algorithm, error) {
 }
 
 type Sorter interface {
-	Step() bool
+	Step() (*iteration.Stat, bool)
 	Shuffle()
 	Dump() *iteration.ArrayIterator
 	String() string

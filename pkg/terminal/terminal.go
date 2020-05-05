@@ -13,6 +13,10 @@ import (
 	"github.com/shkov/sort-visualization/pkg/iteration"
 )
 
+const (
+	MaxBarChartItems = 45
+)
+
 type Config struct {
 	Sorter         Sorter
 	RefreshTimeout time.Duration
@@ -31,7 +35,7 @@ func (cfg Config) Validate() error {
 
 type Sorter interface {
 	Shuffle()
-	Step() bool
+	Step() (*iteration.Stat, bool)
 	Dump() *iteration.ArrayIterator
 	String() string
 }
@@ -61,11 +65,13 @@ func New(cfg Config) (*Terminal, error) {
 
 	bc := widgets.NewBarChart()
 	bc.Title = strings.Join([]string{cfg.Sorter.String(), "sort"}, " ")
-	bc.SetRect(5, 5, 190, 56)
+	bc.SetRect(5, 5, 189, 56)
 	bc.BarWidth = 2
 	bc.BarGap = 2
 	bc.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
 	bc.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
+	bc.NumFormatter = func(f float64) string { return "" }
+	bc.MaxVal = 49
 
 	t := &Terminal{
 		state:          stateWaiting,
@@ -120,7 +126,7 @@ func (t *Terminal) RunWidget() error {
 }
 
 func (t *Terminal) renderBadChart() {
-	ok := t.sorter.Step()
+	stat, ok := t.sorter.Step()
 	if !ok {
 		t.sorter.Shuffle()
 		return
@@ -145,6 +151,12 @@ func (t *Terminal) renderBadChart() {
 
 	t.barChart.Data = dataset
 	t.barChart.BarColors = colors
+	t.barChart.Title = fmt.Sprintf("%s sort; %d comparisons; %d array accesses",
+		t.sorter.String(),
+		stat.GetComparisonsTotal(),
+		stat.GetArrayAccessesTotal(),
+	)
+
 	ui.Render(t.barChart)
 }
 
