@@ -13,7 +13,7 @@ import (
 )
 
 type mockSorter struct {
-	onStep   func() bool
+	onStep   func() (*iteration.Stat, bool)
 	onDump   func() *iteration.ArrayIterator
 	onString func() string
 }
@@ -21,7 +21,7 @@ type mockSorter struct {
 func (m mockSorter) Shuffle() {
 }
 
-func (m mockSorter) Step() bool {
+func (m mockSorter) Step() (*iteration.Stat, bool) {
 	return m.onStep()
 }
 
@@ -141,13 +141,15 @@ func TestTerminal_renderBadChart(t *testing.T) {
 				state:    stateRunning,
 				barChart: bc,
 				sorter: mockSorter{
-					onStep: func() bool {
-						return tc.gotStep
+					onStep: func() (*iteration.Stat, bool) {
+						return &iteration.Stat{}, tc.gotStep
 					},
 					onDump: func() *iteration.ArrayIterator {
 						return iteration.NewArrayIterator(tc.newDataset)
 					},
-					onString: nil,
+					onString: func() string {
+						return "testSorter"
+					},
 				},
 			}
 
@@ -162,8 +164,8 @@ func TestTerminal_renderBadChart(t *testing.T) {
 func makeConfig(_ *testing.T, fn func(cfg *Config)) *Config {
 	cfg := &Config{
 		Sorter: mockSorter{
-			onStep: func() bool {
-				return true
+			onStep: func() (*iteration.Stat, bool) {
+				return &iteration.Stat{}, true
 			},
 			onDump: func() *iteration.ArrayIterator {
 				return &iteration.ArrayIterator{}
