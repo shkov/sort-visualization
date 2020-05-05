@@ -10,32 +10,42 @@ type InsertionSorter struct {
 	arr  []int
 	stat iteration.Stat
 
-	maxSortedIdx int
+	maxSortedIdx  int
+	processingIdx int
 }
 
 func NewInsertionSorter(arr []int) Sorter {
 	return &InsertionSorter{
-		arr:          arr,
-		stat:         iteration.Stat{},
-		maxSortedIdx: 1,
+		arr:           arr,
+		stat:          iteration.Stat{},
+		maxSortedIdx:  1,
+		processingIdx: 1,
 	}
 }
 
 func (is *InsertionSorter) Step() (*iteration.Stat, bool) {
+	if is.processingIdx < 1 {
+		is.maxSortedIdx++
+		is.processingIdx = is.maxSortedIdx
+	}
+
 	if is.maxSortedIdx == len(is.arr) {
 		return nil, false
 	}
 
-	j := is.maxSortedIdx
-	for j > 0 {
-		if is.arr[j-1] > is.arr[j] {
-			is.arr[j-1], is.arr[j] = is.arr[j], is.arr[j-1]
+	for is.processingIdx > 0 {
+		is.stat.OnComparison()
+		is.stat.OnArrayAccess()
+		is.stat.OnArrayAccess()
+		if is.arr[is.processingIdx-1] > is.arr[is.processingIdx] {
+			is.stat.OnArrayAccess()
+			is.stat.OnArrayAccess()
+			is.arr[is.processingIdx-1], is.arr[is.processingIdx] = is.arr[is.processingIdx], is.arr[is.processingIdx-1]
+			break
 		}
 
-		j--
+		is.processingIdx--
 	}
-
-	is.maxSortedIdx++
 
 	return &is.stat, true
 }
@@ -44,6 +54,7 @@ func (is *InsertionSorter) Shuffle() {
 	rand.Shuffle(len(is.arr), func(i, j int) { is.arr[i], is.arr[j] = is.arr[j], is.arr[i] })
 	is.stat = iteration.Stat{}
 	is.maxSortedIdx = 1
+	is.processingIdx = 1
 }
 
 func (is *InsertionSorter) Dump() *iteration.ArrayIterator {
