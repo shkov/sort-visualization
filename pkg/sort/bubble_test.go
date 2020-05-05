@@ -9,6 +9,7 @@ import (
 )
 
 func TestBubbleSorter_Step(t *testing.T) {
+
 	testCases := []struct {
 		name    string
 		arr     []int
@@ -16,8 +17,8 @@ func TestBubbleSorter_Step(t *testing.T) {
 	}{
 		{
 			name:    "normal response",
-			arr:     []int{7, 4, 3, 6, 5, 2, 1},
-			wantArr: []int{1, 2, 3, 4, 5, 6, 7},
+			arr:     []int{44, 28, 43, 25, 1, 11, 29, 40, 30, 26, 18, 16, 12, 8, 19, 17, 4, 13, 20, 24, 10, 7, 27, 6, 21, 41, 9, 3, 5, 2, 45, 14, 15, 23, 42, 22},
+			wantArr: []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 40, 41, 42, 43, 44, 45},
 		},
 		{
 			name:    "reverse",
