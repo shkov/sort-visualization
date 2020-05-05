@@ -40,8 +40,6 @@ func (bs *BubbleSorter) Step() (*iteration.Stat, bool) {
 	if bs.arr[bs.j] < bs.arr[bs.j-1] {
 		bs.stat.OnArrayAccess()
 		bs.stat.OnArrayAccess()
-		bs.stat.OnArrayAccess()
-		bs.stat.OnArrayAccess()
 		bs.arr[bs.j], bs.arr[bs.j-1] = bs.arr[bs.j-1], bs.arr[bs.j]
 	}
 
