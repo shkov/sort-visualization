@@ -15,6 +15,7 @@ type Algorithm string
 const (
 	AlgorithmBubble    Algorithm = "bubble"
 	AlgorithmSelection Algorithm = "selection"
+	AlgorithmInsertion Algorithm = "insertion"
 )
 
 func ParseAlgorithm(val string) (Algorithm, error) {
@@ -23,6 +24,8 @@ func ParseAlgorithm(val string) (Algorithm, error) {
 		return AlgorithmBubble, nil
 	case AlgorithmSelection:
 		return AlgorithmSelection, nil
+	case AlgorithmInsertion:
+		return AlgorithmInsertion, nil
 	}
 
 	return "", errInvalidAlgorithm
@@ -44,8 +47,12 @@ func NewSorter(arr []int, algorithmStr string) (Sorter, error) {
 	switch algorithm {
 	case AlgorithmBubble:
 		return NewBubbleSorter(arr), nil
+
 	case AlgorithmSelection:
 		return NewSelectionSorter(arr), nil
+
+	case AlgorithmInsertion:
+		return NewInsertionSorter(arr), nil
 
 	default:
 		return nil, errInvalidAlgorithm
