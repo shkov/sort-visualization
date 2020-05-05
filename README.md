@@ -5,8 +5,6 @@
 Visualization of Sorting Algorithms in Golang.
 Sorts random shuffles of integers, with both speed and the number of items adapted to each algorithm's complexity.
 
-![](demo/bubble.gif)
-
 ## Getting started
 
 #### 1. Installation
@@ -30,3 +28,16 @@ Usage of sort-visualization:
   -refresh duration
     	bar chart refresh interval (default 5ms)
 ```
+
+#### 3. Sorting Algorithms
+
+- [x] Bubble Sort
+![](demo/bubble.gif)
+- [x] Insertion Sort
+![](demo/insertion.gif)
+- [x] Selection Sort
+![](demo/selection.gif)
+- [ ] Merge Sort
+- [ ] Heapsort
+- [ ] Quick Sort
+- [ ] Radix
