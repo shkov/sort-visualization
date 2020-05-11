@@ -16,7 +16,11 @@ type configuration struct {
 
 func parseConfiguration() (*configuration, error) {
 	terminalRefreshInterval := flag.Duration("refresh", 5*time.Millisecond, "bar chart refresh interval")
-	sortingAlgorithm := flag.String("algorithm", "bubble", "possible: 'bubble', 'insertion', 'selection'")
+	sortingAlgorithm := flag.String(
+		"algorithm",
+		"bubble",
+		"possible: 'bubble', 'insertion', 'selection', 'merge'",
+	)
 	flag.Parse()
 
 	return &configuration{

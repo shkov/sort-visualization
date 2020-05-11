@@ -1,12 +1,9 @@
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/gizak/termui/v3 v3.1.0
-## explicit
 github.com/gizak/termui/v3
-github.com/gizak/termui/v3/drawille
 github.com/gizak/termui/v3/widgets
-# github.com/go-kit/kit v0.10.0
-## explicit
+github.com/gizak/termui/v3/drawille
 # github.com/mattn/go-runewidth v0.0.2
 github.com/mattn/go-runewidth
 # github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7
@@ -16,7 +13,6 @@ github.com/nsf/termbox-go
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/testify v1.4.0
-## explicit
 github.com/stretchr/testify/assert
 # gopkg.in/yaml.v2 v2.2.2
 gopkg.in/yaml.v2
